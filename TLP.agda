@@ -86,6 +86,24 @@ size x with cdr x
 size x | just x₁ = suc (size x₁)
 size x | nothing = suc zero
 
+-- size-test
+createcons : ℕ → Star
+createcons (suc x) = (C (A (N x)) (createcons x))
+createcons zero = NIL
+
+sizet = λ x → size (createcons x)
+
+> : (x y : Star ) → Bool
+> (A (N zero)) (A (N zero)) = false
+> (A (N zero)) (A (N (suc x₁))) = false
+> (A (N (suc x))) (A (N zero)) = true
+> (A (N (suc x))) (A (N (suc x₁))) = (> (A (N x)) (A (N x₁)))
+> _ _ = false
+
+-- >-test
+-- C-C, C-n, ">t 20 10".  Agda return true
+>t = λ x y → (> (A (N x)) (A (N y)))
+
 -- ? (λ _ → suc) 0
 -- List だと foldr つかって受け取ったら suc を返す関数 を定義
 -- 最後に suc ~ zero にして全体が出る
@@ -219,6 +237,8 @@ if-nest-E true y z | false = refl
 if-nest-E false y z | true = sequalSame z
 if-nest-E true y z | true = refl
 
+
+-- (atom x) をどうするかわかんなかったからとりあえず false をおいてる
 cons/car+cdr : (x : Star) → (if false TRU (sequal (mcons (car x) (cdr x)) x)) ≡ TRU
 cons/car+cdr x with primStringEquality nil tru
 cons/car+cdr (A (S x)) | false = sequalSame (A (S x))
@@ -238,3 +258,5 @@ cons/car+cdr (C x x₁) | true | A .(S _) | refl | A .(S "tru") | refl = refl
 natp/size : (x : Star) → (mequal (just (natp (A (N (size x))))) (just TRU)) ≡ true
 natp/size x = refl
 
+-- size/car : (x : Star) → (if false TRU (sequal (> (size (car x)) (size x)) true))
+-- size/car x = ?
