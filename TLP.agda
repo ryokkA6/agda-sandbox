@@ -121,53 +121,69 @@ sequal : (x y : Star) -> Star
 sequal (A (S x)) (A (S x₁)) with x == x₁
 sequal (A (S x)) (A (S x₁)) | false = NIL
 sequal (A (S x)) (A (S x₁)) | true = TRU
-sequal (A (N x)) (A (N x₁)) with (eq x x₁)
-sequal (A (N x)) (A (N x₁)) | false = NIL
-sequal (A (N x)) (A (N x₁)) | true = TRU
+sequal (A (N x)) (A (N x₁)) with  x Data.Nat.≟ x₁
+sequal (A (N x)) (A (N x₁)) | Relation.Nullary.yes p = TRU
+sequal (A (N x)) (A (N x₁)) | Relation.Nullary.no ¬p = NIL
 sequal (C (S x) x₁) (C (S x₂) y) with x == x₂
 sequal (C (S x) x₁) (C (S x₂) y) | false = NIL
 sequal (C (S x) x₁) (C (S x₂) y) | true = sequal x₁ y
-sequal (C (N x) x₁) (C (N x₂) y) with (eq x x₂)
-sequal (C (N x) x₁) (C (N x₂) y) | false = NIL
-sequal (C (N x) x₁) (C (N x₂) y) | true = sequal x₁ y
+sequal (C (N x) x₁) (C (N x₂) y) with  x Data.Nat.≟ x₂
+sequal (C (N x) x₁) (C (N x₂) y) | Relation.Nullary.yes p = sequal x₁ y
+sequal (C (N x) x₁) (C (N x₂) y) | Relation.Nullary.no ¬p = NIL
 sequal _ _ = NIL
 
--- mequal : (x y : Maybe Star) -> Bool
--- mequal (just (A (N x))) (just (A (N x₁))) = eq x x₁
--- mequal (just (A (S x))) (just (A (S x₁))) = primStringEquality x x₁
--- mequal (just (C x x₂)) (just (C x₁ y)) = mequal (just (A x)) (just (A x₁)) ∧ mequal (just x₂) (just y)
--- mequal _ _ = false
+mequal : (x y : Maybe Star) -> Bool
+mequal (just (A (N x))) (just (A (N x₁))) with x Data.Nat.≟ x₁
+... | a = true
+mequal (just (A (S x))) (just (A (S x₁))) = primStringEquality x x₁
+mequal (just (C (S x) x₂)) (just (C (S x₁) y)) with x == x₁
+mequal (just (C (S x) x₂)) (just (C (S x₁) y)) | false = false
+mequal (just (C (S x) x₂)) (just (C (S x₁) y)) | true = mequal (just x₂) (just y)
+mequal (just (C (N x) x₂)) (just (C (N x₁) y)) with x Data.Nat.≟ x₁
+mequal (just (C (N x) x₂)) (just (C (N x₁) y)) | Relation.Nullary.yes p = mequal (just x₂) (just y)
+mequal (just (C (N x) x₂)) (just (C (N x₁) y)) | Relation.Nullary.no ¬p = false
+mequal _ _ = false
 
--- cong : {a b : Set} {x y : a} (f : a → b) →  x ≡ y → f x ≡ f y
--- cong _ refl = refl
+cong : {a b : Set} {x y : a} (f : a → b) →  x ≡ y → f x ≡ f y
+cong _ refl = refl
 
--- stringSame : (x : String) → primStringEquality x x ≡ true
--- stringSame x with (x Data.String.≟ x)
--- stringSame x | (Relation.Nullary.Dec.yes p) = refl
--- stringSame x | (Relation.Nullary.Dec.no ¬p) = ⊥-elim (¬p refl)
+stringSame : (x : String) → primStringEquality x x ≡ true
+stringSame x with (x Data.String.≟ x)
+stringSame x | (Relation.Nullary.Dec.yes p) = refl
+stringSame x | (Relation.Nullary.Dec.no ¬p) = ⊥-elim (¬p refl)
 
--- sequalSame : (x : Star) → sequal x x ≡ TRU
--- sequalSame x = {!!}
+sequalSame : (x : Star) → sequal x x ≡ TRU
+sequalSame (A (S x)) with (x Data.String.≟ x)
+sequalSame (A (S x)) | Relation.Nullary.yes p = refl
+sequalSame (A (S x)) | Relation.Nullary.no ¬p = ⊥-elim (¬p refl)
+sequalSame (A (N x)) with x Data.Nat.≟ x
+sequalSame (A (N x)) | Relation.Nullary.yes p = refl
+sequalSame (A (N x)) | Relation.Nullary.no ¬p = ⊥-elim (¬p refl)
+sequalSame (C (S x) x₁) with x Data.String.≟ x
+sequalSame (C (S x) x₁) | Relation.Nullary.yes p = sequalSame x₁
+sequalSame (C (S x) x₁) | Relation.Nullary.no ¬p = ⊥-elim (¬p refl)
+sequalSame (C (N x) x₁) with x Data.Nat.≟ x
+sequalSame (C (N x) x₁) | Relation.Nullary.yes p = sequalSame x₁
+sequalSame (C (N x) x₁) | Relation.Nullary.no ¬p = ⊥-elim (¬p refl)
+
+mequalSame : (x : Star) → mequal (just x) (just x) ≡ true
+mequalSame (A (S x)) with (x Data.String.≟ x)
+mequalSame (A (S x)) | Relation.Nullary.yes p = refl
+mequalSame (A (S x)) | Relation.Nullary.no ¬p = ⊥-elim (¬p refl)
+mequalSame (A (N x)) with x Data.Nat.≟ x
+... | a = refl
+mequalSame (C (S x) x₁) with (x Data.String.≟ x)
+mequalSame (C (S x) x₁) | Relation.Nullary.yes p = mequalSame x₁
+mequalSame (C (S x) x₁) | Relation.Nullary.no ¬p = ⊥-elim (¬p refl)
+mequalSame (C (N x) x₁) with x Data.Nat.≟ x
+mequalSame (C (N x) x₁) | Relation.Nullary.yes p = mequalSame x₁
+mequalSame (C (N x) x₁) | Relation.Nullary.no ¬p = ⊥-elim (¬p refl)
 
 
--- mequalSame : (x : Star) → mequal (just x) (just x) ≡ true
--- mequalSame x = {!!}
--- -- mequalSame (A (S x)) = stringSame x
--- -- mequalSame (A (N zero)) = refl
--- -- mequalSame (A (N (suc x))) = mequalSame (A (N x))
--- -- mequalSame (C x x₁) with mequal (just x) (just x) | mequalSame x
--- -- mequalSame (C x x₁) | true | refl with mequal (just x₁) (just x₁) | mequalSame x₁
--- -- mequalSame (C x x₁) | true | refl | true | refl = refl
-
--- -- cong ({!!}) (mequalSame x)
-
--- -- sequal _ _ = NIL
-
--- if : (x : Bool) (y z : Star) -> Star
--- if x y z with x
--- if x y z | false = z
--- if x y z | true = y
-
+if : (x : Bool) (y z : Star) -> Star
+if x y z with x
+if x y z | false = z
+if x y z | true = y
 
 -- -- Cons の公理
 -- atom/cons : (x y : Star) → ( (atom (cons x y)) ≡ false)
