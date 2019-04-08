@@ -186,95 +186,90 @@ if x y z | false = z
 if x y z | true = y
 
 -- -- Cons の公理
--- atom/cons : (x y : Star) → ( (atom (cons x y)) ≡ false)
--- atom/cons x y = {!!}
+atom/cons : (x y : Star) → ((atom (cons x y)) ≡ false)
+atom/cons (A x) y = refl
+atom/cons (C x x₁) y = refl
 
--- car/cons : (x y : Star) → (mequal (just (car (cons x y))) (just x)) ≡ true
--- car/cons x y = {!!}
+car/cons : (x : Atom) (y : Star) → (mequal (just (car (cons (A x) y))) (just (A x))) ≡ true
+car/cons (S x) y = mequalSame (A (S x))
+car/cons (N x) y = refl
 
 -- car/mcons : (x y : Star) → (mequal (just (car (mcons (just x) (just y)))) (just x)) ≡ true
 -- car/mcons x y = {!!}
 
 
--- cdr/cons : (x y : Star) → (mequal (cdr (cons x y)) (just y)) ≡ true
--- cdr/cons x y = {!!}
+cdr/cons : (x : Atom) (y : Star) → (mequal (cdr (cons (A x) y)) (just y)) ≡ true
+cdr/cons x (A x₁) = mequalSame (A x₁)
+cdr/cons x (C x₁ y) = mequalSame (C x₁ y)
 
 -- cdr/mcons : (x y : Star) → (mequal (cdr (mcons (just x) (just y))) (just y)) ≡ true
 -- cdr/mcons x y = {!!}
 
--- b2s : (x : Bool) → Star
--- b2s false = NIL
--- b2s true = TRU
+b2s : (x : Bool) → Star
+b2s false = NIL
+b2s true = TRU
 
--- m2s : (x : Maybe Star) → Star
--- m2s (just x) = x
--- m2s nothing = NIL
+m2s : (x : Maybe Star) → Star
+m2s (just x) = x
+m2s nothing = NIL
 
 -- -- IF の公理
--- if-same : (x : Bool) (y : Star) → mequal (just (if x y y)) (just y) ≡ true
--- if-same x y with primStringEquality tru nil
--- if-same false y | false = mequalSame y
--- if-same true y | false = mequalSame y
--- if-same false y | true = mequalSame y
--- if-same true y | true = mequalSame y
+if-same : (x : Bool) (y : Star) → mequal (just (if x y y)) (just y) ≡ true
+if-same x y with primStringEquality tru nil
+if-same false y | false = mequalSame y
+if-same true y | false = mequalSame y
+if-same false y | true = mequalSame y
+if-same true y | true = mequalSame y
 
--- if-true : (x : Bool ) ( y : Star) → (mequal (just (if true TRU y)) (just TRU)) ≡ true
--- if-true x y with primStringEquality tru nil
--- if-true x y | false = {!!}
--- if-true x y | true = {!!}
+if-true : (x : Bool ) ( y : Star) → (mequal (just (if true TRU y)) (just TRU)) ≡ true
+if-true x y with primStringEquality tru nil
+if-true x y | false = refl
+if-true x y | true = refl
 
--- if-false : (x : Bool) (y : Star) → (mequal (just (if false TRU y)) (just y)) ≡ true
--- if-false x y with primStringEquality tru nil
--- if-false x y | false = mequalSame y
--- if-false x y | true = mequalSame y
+if-false : (x : Bool) (y : Star) → (mequal (just (if false TRU y)) (just y)) ≡ true
+if-false x y with primStringEquality tru nil
+if-false x y | false = mequalSame y
+if-false x y | true = mequalSame y
 
--- if-nest-A : (x : Bool) (y z : Star) → (if x (sequal (if x y z) y) TRU) ≡ TRU
--- if-nest-A x y z with primStringEquality tru nil
--- if-nest-A false y z | false = refl
--- if-nest-A true y z | false = sequalSame y
--- if-nest-A false y z | true = refl
--- if-nest-A true y z | true = sequalSame y
+if-nest-A : (x : Bool) (y z : Star) → (if x (sequal (if x y z) y) TRU) ≡ TRU
+if-nest-A x y z with primStringEquality tru nil
+if-nest-A false y z | false = refl
+if-nest-A true y z | false = sequalSame y
+if-nest-A false y z | true = refl
+if-nest-A true y z | true = sequalSame y
 
--- if-nest-E : (x : Bool) (y z : Star) → (if x TRU (sequal (if x y z) z)) ≡ TRU
--- if-nest-E x y z with primStringEquality tru nil
--- if-nest-E false y z | false = sequalSame z
--- if-nest-E true y z | false = refl
--- if-nest-E false y z | true = sequalSame z
--- if-nest-E true y z | true = refl
-
-
--- -- (atom x) をどうするかわかんなかったからとりあえず false をおいてる
--- cons/car+cdr : (x : Star) → (if false TRU (sequal (mcons (just (car x)) (cdr x)) x)) ≡ TRU
--- cons/car+cdr x with primStringEquality nil tru
--- cons/car+cdr (A (S x)) | false = sequalSame (A (S x))
--- cons/car+cdr (A (N x)) | false = sequalSame (A (N x))
--- cons/car+cdr (C x x₁) | false with sequal (A x) (A x) | sequalSame (A x)
--- cons/car+cdr (C x x₁) | false | A .(S "tru") | refl with sequal x₁ x₁ | sequalSame x₁
--- cons/car+cdr (C x x₁) | false | A .(S _) | refl | A .(S "tru") | refl = {!!}
--- cons/car+cdr (A (S x)) | true = sequalSame (A (S x))
--- cons/car+cdr (A (N x)) | true = sequalSame (A (N x))
--- cons/car+cdr (C x x₁) | true with sequal (A x) (A x) | sequalSame (A x)
--- cons/car+cdr (C x x₁) | true | A .(S "tru") | refl with sequal x₁ x₁ | sequalSame x₁
--- cons/car+cdr (C x x₁) | true | A .(S _) | refl | A .(S "tru") | refl = {!!}
+if-nest-E : (x : Bool) (y z : Star) → (if x TRU (sequal (if x y z) z)) ≡ TRU
+if-nest-E x y z with primStringEquality tru nil
+if-nest-E false y z | false = sequalSame z
+if-nest-E true y z | false = refl
+if-nest-E false y z | true = sequalSame z
+if-nest-E true y z | true = refl
 
 
+-- (atom x) をどうするかわかんなかったからとりあえず false をおいてる
+cons/car+cdr : (x : Star) → (if false TRU (sequal (mcons (just (car x)) (cdr x)) x)) ≡ TRU
+cons/car+cdr x with primStringEquality nil tru
+cons/car+cdr (A (S x)) | false = sequalSame (A (S x))
+cons/car+cdr (A (N x)) | false = sequalSame (A (N x))
+cons/car+cdr (C x x₁) | false with sequal (A x) (A x) | sequalSame (A x)
+cons/car+cdr (C x x₁) | false | A .(S "tru") | refl with sequal x₁ x₁ | sequalSame x₁
+cons/car+cdr (C x x₁) | false | A .(S _) | refl | A .(S "tru") | refl = sequalSame (C x x₁)
+cons/car+cdr (A (S x)) | true = sequalSame (A (S x))
+cons/car+cdr (A (N x)) | true = sequalSame (A (N x))
+cons/car+cdr (C x x₁) | true with sequal (A x) (A x) | sequalSame (A x)
+cons/car+cdr (C x x₁) | true | A .(S "tru") | refl with sequal x₁ x₁ | sequalSame x₁
+cons/car+cdr (C x x₁) | true | A .(S _) | refl | A .(S "tru") | refl = sequalSame (C x x₁)
 
 
--- natp/size : (x : Star) → (mequal (just (natp (A (N (size x))))) (just TRU)) ≡ true
--- natp/size x = {!!}
 
--- -- <-size : (x : Star) → (< (size (car x)) (size x)) ≡ true
--- -- <-size (C x x₁) = {!!}
--- -- <-size (A x) = {!!}
 
--- size/car : (x : Star) → (if (atom x) TRU (sequal (b2s (< (size (car x)) (size x))) TRU)) ≡ TRU
--- size/car (A x) with (atom (A x))
--- ... | a = refl
--- size/car (C x x₁) with (atom (C x x₁))
--- size/car (C x x₁) | true = {!!}
--- size/car (C x x₁) | false = {!!}
--- -- size/car x with (atom x)
--- -- size/car x | true = refl
--- -- size/car x | false with (< (size (car x)) (size x))
--- -- size/car x | false | true = refl
--- -- size/car x | false | false = {!!}
+natp/size : (x : Star) → (mequal (just (natp (A (N (size x))))) (just TRU)) ≡ true
+natp/size x = refl
+
+
+size/car : (x : Star) → (if (atom x) TRU (sequal (b2s (< (size (car x)) (size x))) TRU)) ≡ TRU
+size/car (A x) with (atom (A x))
+... | a = refl
+size/car (C x x₁) with (atom (C x x₁))
+size/car (C x x₁) | true = refl
+size/car (C x x₁) | false = refl
