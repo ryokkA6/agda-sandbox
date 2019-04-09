@@ -73,10 +73,10 @@ eq (suc n) (suc m) = eq n m
 eq _ _ = false
 
 
-natp : (x : Star) → Star
-natp (A (S x)) = NIL
-natp (A (N x)) = TRU
-natp (C x x₁) = NIL
+natp : (x : Star) → Bool
+natp (A (S x)) = false
+natp (A (N x)) = true
+natp (C x x₁) = false
 
 < : (x y : ℕ ) → Bool
 < n zero = false
@@ -207,6 +207,14 @@ b2s : (x : Bool) → Star
 b2s false = NIL
 b2s true = TRU
 
+s2b : (x : Star) → Bool
+s2b (A (S x)) with x == nil
+s2b (A (S x)) | false = true
+s2b (A (S x)) | true = false
+s2b (A (N zero)) = false
+s2b (A (N (suc x))) = true
+s2b (C x x₁) = false
+
 m2s : (x : Maybe Star) → Star
 m2s (just x) = x
 m2s nothing = NIL
@@ -218,6 +226,10 @@ if-same false y | false = mequalSame y
 if-same true y | false = mequalSame y
 if-same false y | true = mequalSame y
 if-same true y | true = mequalSame y
+
+if-same2 : (x : Bool) (y : Star) → (if x y y) ≡ y
+if-same2 false y = refl
+if-same2 true y = refl
 
 if-true : (x : Bool ) ( y : Star) → (mequal (just (if true TRU y)) (just TRU)) ≡ true
 if-true x y with primStringEquality tru nil
@@ -251,7 +263,7 @@ cons/car+cdr (A x) | false = sequalSame (A x)
 cons/car+cdr (C x x₁) | false = sequalSame (C x x₁)
 cons/car+cdr x | true = refl
 
-natp/size : (x : Star) → (mequal (just (natp (A (N (size x))))) (just TRU)) ≡ true
+natp/size : (x : Star) → (mequal (just (b2s (natp (A (N (size x)))))) (just TRU)) ≡ true
 natp/size x = refl
 
 size/car : (x : Star) → (if (atom x) TRU (sequal (b2s (< (size (car x)) (size x))) TRU)) ≡ TRU
@@ -264,4 +276,45 @@ size/car (C x x₁) | false = refl
 size/cdr : (x : Star)  → (if (atom x) TRU (b2s (< (size (m2s (cdr x))) (size x)))) ≡ TRU
 size/cdr (A x) = refl
 size/cdr (C x x₁) rewrite natlt (size x₁) = refl
+
+
+memb? : (xs : Star) → Bool
+memb? (A x) = false
+memb? (C (N x) xs) = false
+memb? (C (S x) xs) with x == "?"
+memb? (C (S x) xs) | false = memb? xs
+memb? (C (S x) xs) | true = true
+
+membproof : (xs : Star) → (if (natp (A (N (size xs))))
+                              (if (atom xs)
+                                TRU
+                                (if (mequal (just (car xs)) (just (A (S "?"))))
+                                      TRU
+                                      (b2s (< (size (m2s (cdr xs))) (size xs)))))
+                                      NIL) ≡ TRU
+
+membproof (A x) = refl
+membproof (C x xs) rewrite natlt (size xs) | if-same2 (mequal (just (A x)) (just (A (S "?")))) TRU = refl
+
+remb : (xs : Star) → Star
+remb (A (S x)) with x == "?"
+remb (A (S x)) | false = (A (S x))
+remb (A (S x)) | true = NIL
+remb (A (N x)) = A (N x)
+remb (C (S x) xs) with x == "?"
+remb (C (S x) xs) | false = cons (A (S x)) (remb xs)
+remb (C (S x) xs) | true = (remb xs)
+remb (C (N x) xs) = cons (A (N x)) (remb xs)
+
+
+rembproof : (xs : Star) → (if (natp (A (N (size xs))))
+                              (if (atom xs)
+                                TRU
+                                (if (mequal (just (car xs)) (just (A (S "?"))))
+                                  (b2s (< (size (m2s (cdr xs))) (size xs)))
+                                  (b2s (< (size (m2s (cdr xs))) (size xs)))))
+                              NIL ) ≡ TRU
+rembproof (A x) = refl
+rembproof (C x xs) rewrite membproof (C x xs) | natlt (size xs) | if-same2 (mequal (just (A x)) (just (A (S "?")))) TRU = refl
+
 
