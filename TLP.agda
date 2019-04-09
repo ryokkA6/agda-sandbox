@@ -281,9 +281,9 @@ size/cdr (C x x₁) rewrite natlt (size x₁) = refl
 memb? : (xs : Star) → Bool
 memb? (A x) = false
 memb? (C (N x) xs) = false
-memb? (C (S x) xs) with x == "?"
-memb? (C (S x) xs) | false = memb? xs
-memb? (C (S x) xs) | true = true
+memb? (C (S x) xs) with x Data.String.≟ "?"
+memb? (C (S x) xs) | Relation.Nullary.yes p = true
+memb? (C (S x) xs) | Relation.Nullary.no ¬p = false
 
 membproof : (xs : Star) → (if (natp (A (N (size xs))))
                               (if (atom xs)
@@ -297,14 +297,14 @@ membproof (A x) = refl
 membproof (C x xs) rewrite natlt (size xs) | if-same2 (mequal (just (A x)) (just (A (S "?")))) TRU = refl
 
 remb : (xs : Star) → Star
-remb (A (S x)) with x == "?"
-remb (A (S x)) | false = (A (S x))
-remb (A (S x)) | true = NIL
-remb (A (N x)) = A (N x)
-remb (C (S x) xs) with x == "?"
-remb (C (S x) xs) | false = cons (A (S x)) (remb xs)
-remb (C (S x) xs) | true = (remb xs)
-remb (C (N x) xs) = cons (A (N x)) (remb xs)
+remb (A (S x)) with x Data.String.≟ "?"
+remb (A (S x)) | Relation.Nullary.yes p = NIL
+remb (A (S x)) | Relation.Nullary.no ¬p = (A (S x))
+remb (A (N x)) = (A (N x))
+remb (C (S x) x₁) with x Data.String.≟ "?"
+remb (C (S x) x₁) | Relation.Nullary.yes p = (remb x₁)
+remb (C (S x) x₁) | Relation.Nullary.no ¬p = cons (A (S x)) (remb x₁)
+remb (C (N x) x₁) = cons (A (N x)) (remb x₁)
 
 
 rembproof : (xs : Star) → (if (natp (A (N (size xs))))
@@ -318,3 +318,26 @@ rembproof (A x) = refl
 rembproof (C x xs) rewrite membproof (C x xs) | natlt (size xs) | if-same2 (mequal (just (A x)) (just (A (S "?")))) TRU = refl
 
 
+memb?/remb : (xs : Star) → (memb? (remb xs)) ≡ false
+memb?/remb (A (S x)) with x Data.String.≟ "?"
+memb?/remb (A (S x)) | Relation.Nullary.yes p = refl
+memb?/remb (A (S x)) | Relation.Nullary.no ¬p = refl
+memb?/remb (A (N x)) = refl
+memb?/remb (C (S x) xs) with x Data.String.≟ "?"
+memb?/remb (C (S x) xs) | Relation.Nullary.yes p = memb?/remb xs
+memb?/remb (C (S x) xs) | Relation.Nullary.no ¬p with x Data.String.≟ "?"
+memb?/remb (C (S x) xs) | Relation.Nullary.no ¬p | Relation.Nullary.yes p = ⊥-elim (¬p p)
+memb?/remb (C (S x) xs) | Relation.Nullary.no ¬p | Relation.Nullary.no ¬p₁ = refl
+memb?/remb (C (N x) xs) = refl
+
+-- memb?/remb (A (S x)) with x Data.String.≟ "?"
+-- memb?/remb (A (S x)) | Relation.Nullary.yes p = refl
+-- memb?/remb (A (S x)) | Relation.Nullary.no ¬p = refl
+-- memb?/remb (A (N x)) = refl
+-- memb?/remb (C (S x) xs) with x Data.String.≟ "?"
+
+-- memb?/remb (C (S x) xs) | Relation.Nullary.yes p = memb?/remb xs
+-- memb?/remb (C (S x) xs) | Relation.Nullary.no ¬p with x Data.String.≟ "?"
+-- memb?/remb (C (S x) xs) | Relation.Nullary.no ¬p | Relation.Nullary.yes p = ⊥-elim (¬p p)
+-- memb?/remb (C (S x) xs) | Relation.Nullary.no ¬p | Relation.Nullary.no ¬p₁ = refl
+-- memb?/remb (C (N x) xs) = refl
