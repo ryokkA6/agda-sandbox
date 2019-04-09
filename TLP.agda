@@ -78,14 +78,18 @@ natp (A (S x)) = NIL
 natp (A (N x)) = TRU
 natp (C x x₁) = NIL
 
+< : (x y : ℕ ) → Bool
+< n zero = false
+< zero (suc m) = true
+< (suc n) (suc m) = (< n m)
 
+natlt : (x : ℕ) → < x (suc x) ≡ true
+natlt zero = refl
+natlt (suc x) = natlt x
 
-{-# TERMINATING #-}
 size : (x : Star) → ℕ
 size (A x) = zero
-size x with cdr x
-size x | just x₁ = suc (size x₁)
-size x | nothing = suc zero
+size (C x x₁) = suc (size x₁)
 
 -- size-test
 createcons : ℕ → Star
@@ -94,15 +98,9 @@ createcons zero = NIL
 
 sizet = λ x → size (createcons x)
 
-< : (x y : ℕ ) → Bool
-< zero zero = false
-< zero (suc x₁) = true
-< (suc x) zero = false
-< (suc x) (suc x₁) = (< x x₁)
-
 -- <-test
 -- C-C, C-n, "<t 20 10".  Agda return true
->t = λ x y → (< x y)
+<t = λ x y → (< x y)
 
 -- ? (λ _ → suc) 0
 -- List だと foldr つかって受け取ったら suc を返す関数 を定義
@@ -257,8 +255,13 @@ natp/size : (x : Star) → (mequal (just (natp (A (N (size x))))) (just TRU)) �
 natp/size x = refl
 
 size/car : (x : Star) → (if (atom x) TRU (sequal (b2s (< (size (car x)) (size x))) TRU)) ≡ TRU
-size/car (A x) with (atom (A x))
-... | a = refl
+size/car (A x) = refl
 size/car (C x x₁) with (atom (C x x₁))
 size/car (C x x₁) | true = refl
 size/car (C x x₁) | false = refl
+
+
+size/cdr : (x : Star)  → (if (atom x) TRU (b2s (< (size (m2s (cdr x))) (size x)))) ≡ TRU
+size/cdr (A x) = refl
+size/cdr (C x x₁) rewrite natlt (size x₁) = refl
+
