@@ -247,25 +247,14 @@ if-nest-E true y z | true = refl
 
 
 -- (atom x) をどうするかわかんなかったからとりあえず false をおいてる
-cons/car+cdr : (x : Star) → (if false TRU (sequal (mcons (just (car x)) (cdr x)) x)) ≡ TRU
-cons/car+cdr x with primStringEquality nil tru
-cons/car+cdr (A (S x)) | false = sequalSame (A (S x))
-cons/car+cdr (A (N x)) | false = sequalSame (A (N x))
-cons/car+cdr (C x x₁) | false with sequal (A x) (A x) | sequalSame (A x)
-cons/car+cdr (C x x₁) | false | A .(S "tru") | refl with sequal x₁ x₁ | sequalSame x₁
-cons/car+cdr (C x x₁) | false | A .(S _) | refl | A .(S "tru") | refl = sequalSame (C x x₁)
-cons/car+cdr (A (S x)) | true = sequalSame (A (S x))
-cons/car+cdr (A (N x)) | true = sequalSame (A (N x))
-cons/car+cdr (C x x₁) | true with sequal (A x) (A x) | sequalSame (A x)
-cons/car+cdr (C x x₁) | true | A .(S "tru") | refl with sequal x₁ x₁ | sequalSame x₁
-cons/car+cdr (C x x₁) | true | A .(S _) | refl | A .(S "tru") | refl = sequalSame (C x x₁)
-
-
-
+cons/car+cdr : (x : Star) → (if (atom x) TRU (sequal (mcons (just (car x)) (cdr x)) x)) ≡ TRU
+cons/car+cdr x with atom x
+cons/car+cdr (A x) | false = sequalSame (A x)
+cons/car+cdr (C x x₁) | false = sequalSame (C x x₁)
+cons/car+cdr x | true = refl
 
 natp/size : (x : Star) → (mequal (just (natp (A (N (size x))))) (just TRU)) ≡ true
 natp/size x = refl
-
 
 size/car : (x : Star) → (if (atom x) TRU (sequal (b2s (< (size (car x)) (size x))) TRU)) ≡ TRU
 size/car (A x) with (atom (A x))
